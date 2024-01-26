@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title>Rhythm Train</title>
+  <link href="style.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Anton" rel="stylesheet">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+</head>
+
+<body>
+
+  <h1 id="title">Rhythm 🚂 Train</h1>
+  <h2 id="score">Press any key to begin</h2>
+  
+  <div class="set">
+    <button id="tom1" class="tom1 drum"></button>
+    <button id="tom2" class="tom2 drum"></button>
+    <button id="tom3" class="tom3 drum"></button>
+    <button id="tom4" class="tom4 drum"></button>
+    <button id="kick" class="kick drum"></button>
+    <button id="hihat" class="hihat drum"></button>
+    <button id="snare" class="snare drum"></button>
+    <button id="ride" class="ride drum"></button>
+    <button id="crash" class="crash drum"></button>
+  </div>
+  <script>
+    var drums = ["tom1", "tom2", "tom3", "tom4", "kick", "hihat", "snare", "ride", "crash"];
+    var gameSequence = [];
+    var userSequence = [];
+    var started = false;
+    var score = 0;
+
+    $(document).keydown(function() {
+      if (!started) {
+        $("#score").text("Score: " + score);
+        nextSequence();
+        started = true;
+      }
+    });
+
+    $(".drum").click(function() {
+      var ClickedDrum = $(this).attr("id");
+      userSequence.push(ClickedDrum);
+      animate(ClickedDrum);
+      checkDrum(userSequence.length-1);
+    });
+
+    function checkDrum(currentLevel) {
+      if (gameSequence[currentLevel] === userSequence[currentLevel]) {
+        if (userSequence.length === gameSequence.length){
+          score++;
+          $("#score").text("Score " + score);
+          playSound("correct");
+          setTimeout(function () {
+            nextSequence();
+          }, 1000);
+        }
+      } 
+      else {
+        if (started) {
+          gameOver();
+        }
+      }
+    }
+
+  function nextSequence() {
+    userSequence = [];
+    var newDrum = drums[Math.floor(Math.random() * 9)];
+    gameSequence.push(newDrum);
+    for (var i = 0; i < gameSequence.length; i++) {
+      (function(drum) {
+        setTimeout(function () {
+          animate(gameSequence[drum])
+        }, 400 * drum);
+      })(i);
+    }
+  }
+
+  function animate(drum) {
+    playSound(drum);
+    $("#" + drum).addClass("pressed");
+    setTimeout(function () {
+      $("#" + drum).removeClass("pressed");
+    }, 100);
+  }
+
+  function playSound(name) {
+    var audio = new Audio("sounds/" + name + ".mp3");
+    audio.play();
+  }
+
+  function gameOver() {
+    playSound("wrong");
+    $("body").addClass("redbg");
+    $("#score").text("Game Over. Your final score is " + score + ". Press any key to restart");
+    setTimeout(function () {
+      $("body").removeClass("redbg");
+    }, 200);
+    score = 0;
+    gameSequence = [];
+    started = false;
+  }
+
+  </script>
+</body>
+</html>
